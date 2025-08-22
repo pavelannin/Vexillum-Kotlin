@@ -33,3 +33,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Vexillum"
 includeBuild("build-plugin")
+include(
+    ":core",
+)
