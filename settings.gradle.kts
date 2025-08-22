@@ -32,3 +32,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Vexillum"
+includeBuild("build-plugin")
