@@ -1,8 +1,7 @@
-package io.github.pavelannin.vexillum
+package io.github.pavelannin.vexillum.memory
 
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
-import io.github.pavelannin.vexillum.memory.ObservableMutableMap
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
