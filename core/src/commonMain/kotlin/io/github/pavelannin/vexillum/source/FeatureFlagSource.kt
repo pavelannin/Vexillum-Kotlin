@@ -1,72 +1,93 @@
 package io.github.pavelannin.vexillum.source
 
-import io.github.pavelannin.vexillum.RuntimeFeatureFlag
-import io.github.pavelannin.vexillum.runtime.RuntimeFeatureFlagMomentValue
-import io.github.pavelannin.vexillum.runtime.RuntimeFeatureFlagValue
+import io.github.pavelannin.vexillum.FlowFeatureFlagSpec
+import io.github.pavelannin.vexillum.MutableFeatureFlagSpec
 import kotlinx.coroutines.flow.Flow
 
 /**
  * ###### EN:
- * Represents the source of obtaining the actual values of the changeable flag feature.
+ * Represents a data source for providing the actual value of a feature flag.
+ *
+ * Examples of data sources:
+ * - Backend (REST API)
+ * - Local storage (In-Memory / Shared Preferences / Data Store / SQL / Room)
+ * - Firebase Remote Config
+ *
  * ###### RU:
- * Представляет источник получения фактических значений изменяемы фичи флагов.
+ * Представляет источник данных для предоставления фактического значения фича-флага.
+ *
+ * Примеры источников данных:
+ * - Сервераная часть (REST API)
+ * - Хранимые настройки (In-Memory / Shared Preferences / Data Store / SQL / Room)
+ * - Firebase Remote Config
+ *
+ * @property id
+ * ###### EN:
+ * Unique data source identifier.
+ *
+ * ###### RU:
+ * Уникальный идентификатор источника данных.
+ *
+ * @property description
+ * ###### EN:
+ * Human-readable purpose of this data source.
+ *
+ * ###### RU:
+ * Понятное человеку назначение этого источника данных.
  */
 public interface FeatureFlagSource {
-    /**
-     * ###### EN:
-     * Retrieves the current value for the [flag].
-     * Returns null if the flag is not found in the source or if no value is set.
-     * ###### RU:
-     * Возвращает текущее значение для указанного [flag].
-     * Возвращает null, если флаг не найден в источнике или значение не установлено.
-     */
-    @RuntimeFeatureFlagMomentValue
-    public operator fun <Payload : Any> get(flag: RuntimeFeatureFlag<Payload>): RuntimeFeatureFlagValue<Payload>?
+    public val id: String
+    public val description: String?
 
     /**
      * ###### EN:
-     * Observes changes to the [flag] value.
-     * Returns a [Flow] that emits the current value and all subsequent updates.
-     * Emits `null` if the flag is not available in the source.
+     * Returns actual values for a feature flag.
+     *
      * ###### RU:
-     * Наблюдает за изменениями значения [flag].
-     * Возвращает [Flow], который испускает текущее значение и все последующие обновления.
-     * Испускает `null`, если флаг недоступен в источнике.
-     */
-    public fun <Payload : Any> observe(flag: RuntimeFeatureFlag<Payload>): Flow<RuntimeFeatureFlagValue<Payload>?>
-}
-
-/**
- * ###### EN:
- * Represents a modifiable source for the actual values of the flags being modified by the feature.
- * ###### RU:
- * Представляет изменяемый источник для фактических значений изменяемых фичи флагов.
- */
-public interface FeatureFlagMutableSource : FeatureFlagSource {
-    /**
+     * Возвращает фактические значения для фича-флага.
+     *
+     * @param spec
      * ###### EN:
-     * Updates the value of the [flag] using a transformation function.
+     * Specification of the requested feature flag.
+     *
      * ###### RU:
-     * Обновляет значение [flag] с использованием функции преобразования.
+     * Спецификация запрашиваемого фича-флага.
+     *
+     * @return
+     * ###### EN:
+     * Returns the current value of the feature flag, returns `null` if the value is not available.
+     *
+     * ###### RU:
+     * Возвращает текущее значение фича-флага, если значение отсутствует возвращает `null`.
      */
-    public suspend fun <Payload : Any> update(
-        flag: RuntimeFeatureFlag<Payload>,
-        block: suspend RuntimeFeatureFlag<Payload>.(RuntimeFeatureFlagValue<Payload>) -> RuntimeFeatureFlagValue<Payload>
-    )
+    public suspend operator fun <Value : Any> get(spec: MutableFeatureFlagSpec<Value>): Value?
 
     /**
      * ###### EN:
-     * Removes the [flag] from the source.
+     * Returns actual values for a feature flag.
+     *
      * ###### RU:
-     * Удаляет указанный [flag] из источника.
-     */
-    public suspend fun remove(flag: RuntimeFeatureFlag<*>)
-
-    /**
+     * Возвращает фактические значения для фича-флага.
+     *
+     * @param spec
      * ###### EN:
-     * Removes all runtime feature flag values from the source.
+     * Specification of the requested feature flag.
+     *
      * ###### RU:
-     * Удаляет все значения из источника.
+     * Спецификация запрашиваемого фича-флага.
+     *
+     * @return
+     * ###### EN:
+     * Returns a [Flow] that emits the current value and all subsequent updates for
+     * the feature flag.
+     * If the source doesn't support the current feature flag, returns `null`.
+     * If the value is missing, emits `null'.
+     *
+     * ###### RU:
+     * Возвращает [Flow], который испускает текущее значение и все последующие обновления для
+     * фича-флага.
+     * Если источник не поддерживает текущий фича-флаг, возвращает `null`.
+     * Если значение отсутствует, испускает `null`.
      */
-    public suspend fun clear()
+    public operator fun <Value : Any> get(spec: FlowFeatureFlagSpec<Value>): Flow<Value?>?
 }
