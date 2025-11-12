@@ -1,4 +1,4 @@
-package io.github.pavelannin.vexillum.runtime
+package io.github.pavelannin.vexillum.delegate.annotation
 
 import kotlin.annotation.AnnotationTarget.ANNOTATION_CLASS
 import kotlin.annotation.AnnotationTarget.CLASS
@@ -14,16 +14,16 @@ import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
 
 /**
  * ###### EN:
- * This annotation indicates that the annotated code uses the current value
- * of a feature flag at a specific moment in time, which may become stale
- * if the flag value changes later.
+ * The annotation indicates that the annotated code uses the feature flag's value
+ * at a specific moment in time, which may become stale if the flag value changes later.
+ *
  * ###### RU:
- * Эта аннотация указывает, что аннотированный код использует текущее значение
- * фичи флага в конкретный момент времени, которое может устареть
+ * Аннотация указывает, что аннотированный код использует текущее значение
+ * фича-флага в конкретный момент времени, которое может устареть
  * если значение флага изменится позже.
  */
 @RequiresOptIn(
-    level = RequiresOptIn.Level.ERROR,
+    level = RequiresOptIn.Level.WARNING,
     message = "The moment value of the feature flag being changed is used"
 )
 @Retention(AnnotationRetention.BINARY)
@@ -40,4 +40,4 @@ import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
     PROPERTY_SETTER,
     TYPEALIAS
 )
-public annotation class RuntimeFeatureFlagMomentValue
+public annotation class FlowFeatureFlagMomentValue
