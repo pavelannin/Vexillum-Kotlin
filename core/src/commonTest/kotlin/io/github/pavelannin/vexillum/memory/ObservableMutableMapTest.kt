@@ -2,6 +2,7 @@ package io.github.pavelannin.vexillum.memory
 
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
+import io.github.pavelannin.vexillum.source.memory.ObservableMutableMap
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -34,7 +35,7 @@ class ObservableMutableMapTest {
         observableMap.observe(key).test {
             assertNull(awaitItem())
 
-            observableMap.put(key, value)
+            observableMap[key] = value
             assertEquals(42, awaitItem())
 
             expectNoEvents()
@@ -45,11 +46,11 @@ class ObservableMutableMapTest {
     @Test
     fun `should emit updated value when same key is put again`() = runTest {
         val key = "testKey"
-        observableMap.put(key, 42)
+        observableMap[key] = 42
         observableMap.observe(key).test {
             assertEquals(42, awaitItem())
 
-            observableMap.put(key, 100)
+            observableMap[key] = 100
             assertEquals(100, awaitItem())
 
             expectNoEvents()
@@ -60,7 +61,7 @@ class ObservableMutableMapTest {
     @Test
     fun `should emit null when key is removed`() = runTest {
         val key = "testKey"
-        observableMap.put(key, 42)
+        observableMap[key] = 42
 
         observableMap.observe(key).test {
             assertEquals(42, awaitItem())
@@ -78,11 +79,11 @@ class ObservableMutableMapTest {
         val key1 = "key1"
         val key2 = "key2"
 
-        observableMap.put(key1, 42)
+        observableMap[key1] = 42
         observableMap.observe(key1).test {
             assertEquals(42, awaitItem())
 
-            observableMap.put(key2, 100)
+            observableMap[key2] = 100
             expectNoEvents()
 
             cancelAndIgnoreRemainingEvents()
@@ -92,8 +93,8 @@ class ObservableMutableMapTest {
     @Test
     fun `should emit null when map is cleared`() = runTest {
         val key = "testKey"
-        observableMap.put(key, 42)
-        observableMap.put("otherKey", 100)
+        observableMap[key] = 42
+        observableMap["otherKey"] = 100
 
         observableMap.observe(key).test {
             assertEquals(42, awaitItem())
@@ -145,7 +146,7 @@ class ObservableMutableMapTest {
         val key = "testKey"
         val initialValue = 42
         val newValue = 100
-        observableMap.put(key, initialValue)
+        observableMap[key] = initialValue
 
         val result = observableMap.put(key, newValue)
 
@@ -157,7 +158,7 @@ class ObservableMutableMapTest {
     fun `should return correct value from remove operation`() {
         val key = "testKey"
         val value = 42
-        observableMap.put(key, value)
+        observableMap[key] = value
 
         val result = observableMap.remove(key)
 
@@ -200,12 +201,12 @@ class ObservableMutableMapTest {
     @Test
     fun `should only emit distinct values`() = runTest {
         val key = "testKey"
-        observableMap.put(key, 42)
+        observableMap[key] = 42
 
         observableMap.observe(key).test {
-            observableMap.put(key, 42)
-            observableMap.put(key, 42)
-            observableMap.put(key, 42)
+            observableMap[key] = 42
+            observableMap[key] = 42
+            observableMap[key] = 42
 
             assertEquals(42, awaitItem())
             expectNoEvents()

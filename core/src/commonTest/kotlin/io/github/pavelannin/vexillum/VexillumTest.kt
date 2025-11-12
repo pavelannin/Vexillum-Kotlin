@@ -6,7 +6,7 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import io.github.pavelannin.vexillum.interceptor.FeatureFlagInterceptor
-import io.github.pavelannin.vexillum.source.VexillumDefaultValueSource
+import io.github.pavelannin.vexillum.source.stub.VexillumDefaultValueSource
 import io.github.pavelannin.vexillum.source.FeatureFlagSource
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -74,7 +74,7 @@ class VexillumTest {
         assertEquals(sourceValue, vexillum[spec])
 
         // interceptor
-        everySuspend { with(interceptor1) { vexillum.intercept(source1, spec, sourceValue) } } returns interceptedValue
+        everySuspend { with(interceptor1) { vexillum.intercept(spec, source1, sourceValue) } } returns interceptedValue
         vexillum.addInterceptor(interceptor1)
         assertEquals(interceptedValue, vexillum[spec])
     }
@@ -90,7 +90,7 @@ class VexillumTest {
 
         // interceptor
         everySuspend {
-            with(interceptor1) { vexillum.intercept(VexillumDefaultValueSource, spec, defaultValue) }
+            with(interceptor1) { vexillum.intercept(spec, VexillumDefaultValueSource, defaultValue) }
         } returns interceptedValue
         vexillum.addInterceptor(interceptor1)
         assertEquals(interceptedValue, vexillum[spec])
@@ -142,7 +142,7 @@ class VexillumTest {
 
         // interceptor
         everySuspend {
-            with(interceptor1) { vexillum.intercept(source1, spec, sourceValue) }
+            with(interceptor1) { vexillum.intercept(spec, source1, sourceValue) }
         } returns interceptedValue
         vexillum.addInterceptor(interceptor1)
         vexillum[spec].test {
@@ -168,7 +168,7 @@ class VexillumTest {
 
         // interceptor
         everySuspend {
-            with(interceptor1) { vexillum.intercept(VexillumDefaultValueSource, spec, defaultValue) }
+            with(interceptor1) { vexillum.intercept(spec, VexillumDefaultValueSource, defaultValue) }
         } returns interceptedValue
         vexillum.addInterceptor(interceptor1)
         vexillum[spec].test {
