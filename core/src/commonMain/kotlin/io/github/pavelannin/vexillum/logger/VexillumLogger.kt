@@ -24,3 +24,12 @@ public interface VexillumLogger {
      */
     public fun info(message: String)
 }
+
+/**
+ * ###### EN:
+ * Creates a [VexillumLogger] for the target platform.
+ *
+ * ###### RU:
+ * Создает [VexillumLogger] для используемой платформы.
+ */
+public expect fun VexillumLogger(): VexillumLogger

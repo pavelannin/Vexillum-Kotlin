@@ -17,12 +17,48 @@ import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
 import kotlin.getValue
 
+/**
+ * ###### EN:
+ * Represents the main entry point for interacting with the Vexillum library.
+ *
+ * Vexillum provides a unified approach to working with feature flags in an application by combining
+ * data sources, interceptors, and providing access to feature flag values during application runtime.
+ *
+ * ###### RU:
+ * Представляет основную точку взаимодействия с библиотекой Vexillum.
+ *
+ * Vexillum - единый способ работы с фича-флагами в приложении за счет объединения источников
+ * данных, перехватчиков и предоставления доступа к значениям фича-флагов во время выполнения
+ * приложения.
+ *
+ * @param sources
+ * ###### EN:
+ * Sets the data sources.
+ *
+ * ###### RU:
+ * Устанавливает источники данных.
+ *
+ * @param interceptors
+ * ###### EN:
+ * Sets the interceptors.
+ *
+ * ###### RU:
+ * Устанавливает перехватчики.
+ *
+ * @param logger
+ * ###### EN:
+ * Sets the logger.
+ *
+ * ###### RU:
+ * Устанавливает логгер.
+ */
 public fun Vexillum(
     sources: Set<FeatureFlagSource> = emptySet(),
     interceptors: Set<FeatureFlagInterceptor> = emptySet(),
     logger: VexillumLogger? = null,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ): Vexillum = VexillumImpl(sources, interceptors, logger, dispatcher)
+
 
 private class VexillumImpl(
     sources: Set<FeatureFlagSource>,
