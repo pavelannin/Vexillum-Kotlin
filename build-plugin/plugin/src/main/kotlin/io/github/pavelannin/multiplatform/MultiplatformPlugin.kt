@@ -1,10 +1,8 @@
 package io.github.pavelannin.multiplatform
 
-import io.github.pavelannin.publish.PublishExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
