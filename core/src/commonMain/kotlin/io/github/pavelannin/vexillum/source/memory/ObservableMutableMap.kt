@@ -1,4 +1,4 @@
-package io.github.pavelannin.vexillum.memory
+package io.github.pavelannin.vexillum.source.memory
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
