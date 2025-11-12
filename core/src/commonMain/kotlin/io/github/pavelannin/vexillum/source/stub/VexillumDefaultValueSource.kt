@@ -1,7 +1,8 @@
-package io.github.pavelannin.vexillum.source
+package io.github.pavelannin.vexillum.source.stub
 
 import io.github.pavelannin.vexillum.FlowFeatureFlagSpec
 import io.github.pavelannin.vexillum.MutableFeatureFlagSpec
+import io.github.pavelannin.vexillum.source.FeatureFlagSource
 import kotlinx.coroutines.flow.Flow
 
 /**

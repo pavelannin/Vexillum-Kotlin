@@ -2,7 +2,7 @@ package io.github.pavelannin.vexillum
 
 import io.github.pavelannin.vexillum.interceptor.FeatureFlagInterceptor
 import io.github.pavelannin.vexillum.logger.VexillumLogger
-import io.github.pavelannin.vexillum.source.VexillumDefaultValueSource
+import io.github.pavelannin.vexillum.source.stub.VexillumDefaultValueSource
 import io.github.pavelannin.vexillum.source.FeatureFlagSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
