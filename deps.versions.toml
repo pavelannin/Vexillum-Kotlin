@@ -9,6 +9,7 @@ gradle-publish = "2.0.0"
 turbine = "1.2.1"
 androidx-datastore = "1.1.7"
 mokkery = "2.10.2"
+vexillum = "1.0.0-beta01"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-language" }
@@ -28,8 +29,10 @@ plugin-kotlin-multiplatform = { module = "org.jetbrains.kotlin.multiplatform:org
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin-language" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-language" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-language" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-language" }
 gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-publish" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
+vexillum = { id = "io.github.pavelannin.vexillum", version.ref = "vexillum" }
