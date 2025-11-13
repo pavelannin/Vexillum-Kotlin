@@ -1,9 +1,11 @@
 package io.github.pavelannin.vexillum.plugin.generator
 
 import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
@@ -17,8 +19,8 @@ import io.github.pavelannin.vexillum.scope.FlowFeatureFlagValue
 import io.github.pavelannin.vexillum.scope.ImmutableFeatureFlagValue
 import io.github.pavelannin.vexillum.scope.MutableFeatureFlagValue
 import io.github.pavelannin.vexillum.scope.VexillumSpace
-import io.github.pavelannin.vexillum.plugin.dsl.VexillumFeatureFlagDsl
-import io.github.pavelannin.vexillum.plugin.dsl.VexillumSpaceDsl
+import io.github.pavelannin.vexillum.plugin.dsl.FeatureFlagDsl
+import io.github.pavelannin.vexillum.plugin.dsl.SpaceDsl
 import kotlinx.coroutines.flow.SharingStarted
 import org.gradle.internal.extensions.stdlib.capitalized
 
@@ -36,7 +38,7 @@ internal object CodeGenerator {
             .build()
     }
 
-    fun genSpaceFileSpec(space: VexillumSpaceDsl, packageClass: String): FileSpec {
+    fun genSpaceFileSpec(space: SpaceDsl, packageClass: String): FileSpec {
         val fileName = space.name.capitalized()
 
         val spaceTypeSpec = TypeSpec.objectBuilder(fileName)
@@ -60,9 +62,9 @@ internal object CodeGenerator {
 
         for (flag in space.featureFlags) {
             val property = when (flag) {
-                is VexillumFeatureFlagDsl.Immutable -> immutablePropertySpec(flag, space.isDelegateStyle)
-                is VexillumFeatureFlagDsl.Mutable -> mutablePropertySpec(flag, space.isDelegateStyle)
-                is VexillumFeatureFlagDsl.Flow -> flowPropertySpec(flag, space.isDelegateStyle)
+                is FeatureFlagDsl.Immutable -> immutablePropertySpec(flag, space.isDelegateStyle)
+                is FeatureFlagDsl.Mutable -> mutablePropertySpec(flag, space.isDelegateStyle)
+                is FeatureFlagDsl.Flow -> flowPropertySpec(flag, space.isDelegateStyle)
             }
             spaceTypeSpec.addProperty(property)
         }
@@ -73,7 +75,7 @@ internal object CodeGenerator {
     }
 
     private fun immutablePropertySpec(
-        flag: VexillumFeatureFlagDsl.Immutable,
+        flag: FeatureFlagDsl.Immutable,
         delegateStyle: Boolean,
     ): PropertySpec {
         val flagId = checkNotNull(flag.id) {
@@ -135,7 +137,7 @@ internal object CodeGenerator {
     }
 
     private fun mutablePropertySpec(
-        flag: VexillumFeatureFlagDsl.Mutable,
+        flag: FeatureFlagDsl.Mutable,
         delegateStyle: Boolean,
     ): PropertySpec {
         val flagId = checkNotNull(flag.id) {
@@ -197,7 +199,7 @@ internal object CodeGenerator {
     }
 
     private fun flowPropertySpec(
-        flag: VexillumFeatureFlagDsl.Flow,
+        flag: FeatureFlagDsl.Flow,
         delegateStyle: Boolean,
     ): PropertySpec {
         val flagId = checkNotNull(flag.id) {
@@ -229,10 +231,13 @@ internal object CodeGenerator {
             propertySpec.addKdoc(kDoc)
         }
 
-        val flagStartedStrategy = when (flag.startedStrategy) {
-            VexillumFeatureFlagDsl.Flow.SharingStarted.Lazily -> SharingStarted.Lazily
-            VexillumFeatureFlagDsl.Flow.SharingStarted.Eagerly -> SharingStarted.Eagerly
-        }
+        val flagStartedStrategy = MemberName(
+            SharingStarted.Companion::class.asClassName(),
+            when (flag.startedStrategy) {
+                FeatureFlagDsl.Flow.SharingStarted.Lazily -> "Lazily"
+                FeatureFlagDsl.Flow.SharingStarted.Eagerly -> "Eagerly"
+            },
+        )
         if (delegateStyle) {
             propertySpec.delegate(
                 """
@@ -241,10 +246,10 @@ internal object CodeGenerator {
                     defaultValue = %L,
                     valueType = %L::class,
                     description = %S,
-                    startedStrategy = %L,
+                    startedStrategy = %M,
                 )
             """.trimIndent(),
-                flagId, flagValue,flagTypeValue, flag.description, flagStartedStrategy,
+                flagId, flagValue, flagTypeValue, flag.description, flagStartedStrategy,
             )
         } else {
             propertySpec.initializer(
@@ -254,10 +259,10 @@ internal object CodeGenerator {
                         defaultValue = %L,
                         valueType = %L::class,
                         description = %S,
-                        startedStrategy = %L,
+                        startedStrategy = %M,
                     )
                 """.trimIndent(),
-                flagId, flagValue,flagTypeValue, flag.description, flagStartedStrategy,
+                flagId, flagValue, flagTypeValue, flag.description, flagStartedStrategy,
             )
         }
         return propertySpec.build()

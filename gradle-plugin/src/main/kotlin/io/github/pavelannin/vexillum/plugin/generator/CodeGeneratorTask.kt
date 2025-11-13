@@ -1,6 +1,6 @@
 package io.github.pavelannin.vexillum.plugin.generator
 
-import io.github.pavelannin.vexillum.plugin.dsl.VexillumSpaceDsl
+import io.github.pavelannin.vexillum.plugin.dsl.SpaceDsl
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
@@ -13,7 +13,7 @@ open class CodeGeneratorTask : DefaultTask() {
     @get:Input
     lateinit var packageClass: String
     @get:Input
-    lateinit var spaces: List<VexillumSpaceDsl>
+    lateinit var spaces: List<SpaceDsl>
     @get:OutputDirectory
     lateinit var outputDir: File
 

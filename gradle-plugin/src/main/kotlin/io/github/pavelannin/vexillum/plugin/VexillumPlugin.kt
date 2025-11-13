@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 
 class VexillumPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val vexillumExt = project.extensions.create("vexillum", VexillumExtensions::class.java)
+        val vexillumExt = project.extensions.create("vexillum", Extensions::class.java)
         val appExt = project.extensions.findByType(BaseAppModuleExtension::class.java)
         val libraryExt = project.extensions.findByType(LibraryExtension::class.java)
 

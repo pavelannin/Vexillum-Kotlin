@@ -2,31 +2,31 @@ package io.github.pavelannin.vexillum.plugin.dsl
 
 import java.io.Serializable
 
-class VexillumSpaceDsl internal constructor(val name: String) : Serializable {
+class SpaceDsl internal constructor(val name: String) : Serializable {
     var isDeprecated: Boolean = false
     var kDoc: String? = null
     var isDelegateStyle: Boolean = true
 
-    internal val featureFlags = mutableListOf<VexillumFeatureFlagDsl>()
+    internal val featureFlags = mutableListOf<FeatureFlagDsl>()
 
-    fun immutable(name: String, init: VexillumFeatureFlagDsl.Immutable.() -> Unit) {
-        val feature = VexillumFeatureFlagDsl.Immutable(name).apply(init)
+    fun immutable(name: String, init: FeatureFlagDsl.Immutable.() -> Unit) {
+        val feature = FeatureFlagDsl.Immutable(name).apply(init)
         featureFlags += feature
     }
 
-    fun mutable(name: String, init: VexillumFeatureFlagDsl.Mutable.() -> Unit) {
-        val feature = VexillumFeatureFlagDsl.Mutable(name).apply(init)
+    fun mutable(name: String, init: FeatureFlagDsl.Mutable.() -> Unit) {
+        val feature = FeatureFlagDsl.Mutable(name).apply(init)
         featureFlags += feature
     }
 
-    fun flow(name: String, init: VexillumFeatureFlagDsl.Flow.() -> Unit) {
-        val feature = VexillumFeatureFlagDsl.Flow(name).apply(init)
+    fun flow(name: String, init: FeatureFlagDsl.Flow.() -> Unit) {
+        val feature = FeatureFlagDsl.Flow(name).apply(init)
         featureFlags += feature
     }
 }
 
-sealed interface VexillumFeatureFlagDsl : Serializable {
-    class Immutable internal constructor(val name: String) : VexillumFeatureFlagDsl {
+sealed interface FeatureFlagDsl : Serializable {
+    class Immutable internal constructor(val name: String) : FeatureFlagDsl {
         var id: String? = null
         var description: String? = null
         var value: String? = null
@@ -35,7 +35,7 @@ sealed interface VexillumFeatureFlagDsl : Serializable {
         var isDeprecated: Boolean = false
     }
 
-    class Mutable internal constructor(val name: String) : VexillumFeatureFlagDsl {
+    class Mutable internal constructor(val name: String) : FeatureFlagDsl {
         var id: String? = null
         var description: String? = null
         var defaultValue: String? = null
@@ -44,7 +44,7 @@ sealed interface VexillumFeatureFlagDsl : Serializable {
         var isDeprecated: Boolean = false
     }
 
-    class Flow internal constructor(val name: String) : VexillumFeatureFlagDsl {
+    class Flow internal constructor(val name: String) : FeatureFlagDsl {
         var id: String? = null
         var description: String? = null
         var defaultValue: String? = null
