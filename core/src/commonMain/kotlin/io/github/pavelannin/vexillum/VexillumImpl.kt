@@ -2,7 +2,6 @@ package io.github.pavelannin.vexillum
 
 import io.github.pavelannin.vexillum.interceptor.FeatureFlagInterceptor
 import io.github.pavelannin.vexillum.logger.VexillumLogger
-import io.github.pavelannin.vexillum.source.stub.VexillumDefaultValueSource
 import io.github.pavelannin.vexillum.source.FeatureFlagSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -92,7 +91,7 @@ private class VexillumImpl(
 
     override suspend fun <Value : Any> get(spec: MutableFeatureFlagSpec<Value>): Value {
         var resultValue = spec.defaultValue
-        var valueSource: FeatureFlagSource = VexillumDefaultValueSource
+        var valueSource: FeatureFlagSource = FeatureFlagSource.DefaultValueSource
 
         for (source in sources) {
             val value = source[spec]
@@ -125,7 +124,7 @@ private class VexillumImpl(
         }
 
         return flow {
-            val default by lazy { VexillumDefaultValueSource to spec.defaultValue }
+            val default by lazy { FeatureFlagSource.DefaultValueSource to spec.defaultValue }
             val flows = sources.mapNotNull { source -> source[spec]?.transformValue(source) }
 
             if (flows.isNotEmpty()) {

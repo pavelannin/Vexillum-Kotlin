@@ -106,14 +106,12 @@ public interface FeatureFlagInterceptor {
      * ###### EN:
      * Data source from which the value was obtained.
      *
-     * If no data source provided the value, then
-     * [io.github.pavelannin.vexillum.source.stub.VexillumDefaultValueSource].
+     * If no data source provided the value, then [FeatureFlagSource.DefaultValueSource].
      *
      * ###### RU:
      * Источник данных из которого было полученно значение.
      *
-     * Если не один источник даннных не предоставил данные, то
-     * [io.github.pavelannin.vexillum.source.stub.VexillumDefaultValueSource].
+     * Если не один источник даннных не предоставил данные, то [FeatureFlagSource.DefaultValueSource].
      *
      * @param value
      * ###### EN:
@@ -153,14 +151,12 @@ public interface FeatureFlagInterceptor {
      * ###### EN:
      * Data source from which the value was obtained.
      *
-     * If no data source provided the value, then
-     * [io.github.pavelannin.vexillum.source.stub.VexillumDefaultValueSource].
+     * If no data source provided the value, then [FeatureFlagSource.DefaultValueSource].
      *
      * ###### RU:
      * Источник данных из которого было полученно значение.
      *
-     * Если не один источник даннных не предоставил данные, то
-     * [io.github.pavelannin.vexillum.source.stub.VexillumDefaultValueSource].
+     * Если не один источник даннных не предоставил данные, то [FeatureFlagSource.DefaultValueSource].
      *
      * @param value
      * ###### EN:

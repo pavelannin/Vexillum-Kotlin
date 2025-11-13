@@ -6,7 +6,6 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import io.github.pavelannin.vexillum.interceptor.FeatureFlagInterceptor
-import io.github.pavelannin.vexillum.source.stub.VexillumDefaultValueSource
 import io.github.pavelannin.vexillum.source.FeatureFlagSource
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -90,7 +89,7 @@ class VexillumTest {
 
         // interceptor
         everySuspend {
-            with(interceptor1) { vexillum.intercept(spec, VexillumDefaultValueSource, defaultValue) }
+            with(interceptor1) { vexillum.intercept(spec, FeatureFlagSource.DefaultValueSource, defaultValue) }
         } returns interceptedValue
         vexillum.addInterceptor(interceptor1)
         assertEquals(interceptedValue, vexillum[spec])
@@ -168,7 +167,7 @@ class VexillumTest {
 
         // interceptor
         everySuspend {
-            with(interceptor1) { vexillum.intercept(spec, VexillumDefaultValueSource, defaultValue) }
+            with(interceptor1) { vexillum.intercept(spec, FeatureFlagSource.DefaultValueSource, defaultValue) }
         } returns interceptedValue
         vexillum.addInterceptor(interceptor1)
         vexillum[spec].test {
