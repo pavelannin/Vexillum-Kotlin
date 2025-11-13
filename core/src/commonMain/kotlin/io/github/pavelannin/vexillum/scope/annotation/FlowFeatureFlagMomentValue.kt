@@ -1,4 +1,4 @@
-package io.github.pavelannin.vexillum.delegate.annotation
+package io.github.pavelannin.vexillum.scope.annotation
 
 import kotlin.annotation.AnnotationTarget.ANNOTATION_CLASS
 import kotlin.annotation.AnnotationTarget.CLASS
