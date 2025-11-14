@@ -4,12 +4,12 @@ kotlin-language = "2.2.21"
 kotlin-coroutines = "1.10.2"
 kotlin-poet = "2.2.0"
 kotlin-serialization-json = "1.9.0"
+kotlin-serialization-yaml = "0.102.0"
 maven-publish = "0.35.0"
 gradle-publish = "2.0.0"
 turbine = "1.2.1"
 androidx-datastore = "1.1.7"
 mokkery = "2.10.2"
-vexillum = "1.0.0-beta01"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin-language" }
@@ -17,6 +17,7 @@ kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-co
 kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines" }
 kotlin-poet = { module = "com.squareup:kotlinpoet", version.ref = "kotlin-poet" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin-serialization-json" }
+kotlin-serialization-yaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kotlin-serialization-yaml" }
 androidx-gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "androidx-datastore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx-datastore" }
@@ -35,4 +36,3 @@ gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-publi
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 mokkery = { id = "dev.mokkery", version.ref = "mokkery" }
-vexillum = { id = "io.github.pavelannin.vexillum", version.ref = "vexillum" }
