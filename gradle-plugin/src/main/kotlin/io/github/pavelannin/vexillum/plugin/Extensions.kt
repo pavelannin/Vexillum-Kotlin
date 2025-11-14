@@ -7,15 +7,15 @@ import java.io.Serializable
 open class Extensions : Serializable {
     var packageClass: String? = null
 
-    internal val spaces = mutableListOf<SpaceDsl>()
-    internal val files = mutableListOf<File>()
+    internal val spacesDSL = mutableListOf<SpaceDsl>()
+    internal val filesYAML = mutableListOf<File>()
 
     fun space(name: String, init: SpaceDsl.() -> Unit) {
         val space = SpaceDsl(name).apply(init)
-        spaces += space
+        spacesDSL += space
     }
 
-    fun fromFile(file: File) {
-        files += file
+    fun fromYamlFile(file: File) {
+        filesYAML += file
     }
 }

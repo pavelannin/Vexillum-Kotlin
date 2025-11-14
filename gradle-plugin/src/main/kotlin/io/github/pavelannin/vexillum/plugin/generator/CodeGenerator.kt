@@ -1,7 +1,6 @@
 package io.github.pavelannin.vexillum.plugin.generator
 
 import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.KModifier
@@ -19,8 +18,12 @@ import io.github.pavelannin.vexillum.scope.FlowFeatureFlagValue
 import io.github.pavelannin.vexillum.scope.ImmutableFeatureFlagValue
 import io.github.pavelannin.vexillum.scope.MutableFeatureFlagValue
 import io.github.pavelannin.vexillum.scope.VexillumSpace
-import io.github.pavelannin.vexillum.plugin.dsl.FeatureFlagDsl
-import io.github.pavelannin.vexillum.plugin.dsl.SpaceDsl
+import io.github.pavelannin.vexillum.plugin.model.FlowFeatureFlagModel
+import io.github.pavelannin.vexillum.plugin.model.FlowSharingStarted
+import io.github.pavelannin.vexillum.plugin.model.ImmutableFeatureFlagModel
+import io.github.pavelannin.vexillum.plugin.model.MutableFeatureFlagModel
+import io.github.pavelannin.vexillum.plugin.model.SpaceModel
+import io.github.pavelannin.vexillum.plugin.model.SpaceStyle
 import kotlinx.coroutines.flow.SharingStarted
 import org.gradle.internal.extensions.stdlib.capitalized
 
@@ -38,13 +41,13 @@ internal object CodeGenerator {
             .build()
     }
 
-    fun genSpaceFileSpec(space: SpaceDsl, packageClass: String): FileSpec {
+    fun genSpaceFileSpec(space: SpaceModel, packageClass: String): FileSpec {
         val fileName = space.name.capitalized()
 
         val spaceTypeSpec = TypeSpec.objectBuilder(fileName)
             .addModifiers(KModifier.PUBLIC)
 
-        if (space.isDeprecated) {
+        if (space.deprecated) {
             val deprecatedAnnotationSpec =  AnnotationSpec.builder(Deprecated::class)
                 .addMember("%S", "This space is deprecated.")
                 .build()
@@ -56,15 +59,17 @@ internal object CodeGenerator {
             spaceTypeSpec.addKdoc(kDoc)
         }
 
-        if (space.isDelegateStyle) {
-            spaceTypeSpec.addSuperinterface(VexillumSpace::class, CodeBlock.of("VexillumSpace($SINGLETON_NAME)"))
+        when (space.style) {
+            SpaceStyle.Property -> {}
+            SpaceStyle.Delegate ->
+                spaceTypeSpec.addSuperinterface(VexillumSpace::class, CodeBlock.of("VexillumSpace($SINGLETON_NAME)"))
         }
 
-        for (flag in space.featureFlags) {
+        for (flag in space.flags) {
             val property = when (flag) {
-                is FeatureFlagDsl.Immutable -> immutablePropertySpec(flag, space.isDelegateStyle)
-                is FeatureFlagDsl.Mutable -> mutablePropertySpec(flag, space.isDelegateStyle)
-                is FeatureFlagDsl.Flow -> flowPropertySpec(flag, space.isDelegateStyle)
+                is ImmutableFeatureFlagModel -> immutablePropertySpec(flag, space.style)
+                is MutableFeatureFlagModel -> mutablePropertySpec(flag, space.style)
+                is FlowFeatureFlagModel -> flowPropertySpec(flag, space.style)
             }
             spaceTypeSpec.addProperty(property)
         }
@@ -74,28 +79,18 @@ internal object CodeGenerator {
             .build()
     }
 
-    private fun immutablePropertySpec(
-        flag: FeatureFlagDsl.Immutable,
-        delegateStyle: Boolean,
-    ): PropertySpec {
-        val flagId = checkNotNull(flag.id) {
-            "The required 'id' parameter for the '${flag.name}' feature flag is not specified."
+    private fun immutablePropertySpec(flag: ImmutableFeatureFlagModel, style: SpaceStyle): PropertySpec {
+        val propertyType = when (style) {
+            SpaceStyle.Property -> ImmutableFeatureFlagSpec::class
+            SpaceStyle.Delegate -> ImmutableFeatureFlagValue::class
         }
-        val flagValue = checkNotNull(flag.value) {
-            "The required 'value' parameter for the '${flag.value}' feature flag is not specified."
-        }
-        val flagTypeValue = checkNotNull(flag.valueType) {
-            "The required 'valueType' parameter for the '${flag.name}' feature flag is not specified."
-        }
-
-        val propertyType = (if (delegateStyle) ImmutableFeatureFlagValue::class else ImmutableFeatureFlagSpec::class)
             .asClassName()
-            .parameterizedBy(TypeVariableName(flagTypeValue))
+            .parameterizedBy(TypeVariableName(flag.valueType))
 
         val propertySpec = PropertySpec.builder(flag.name, propertyType, KModifier.PUBLIC)
             .mutable(false)
 
-        if (flag.isDeprecated) {
+        if (flag.deprecated) {
             val deprecatedAnnotationSpec =  AnnotationSpec.builder(Deprecated::class)
                 .addMember("%S", "This feature flag is deprecated.")
                 .build()
@@ -107,22 +102,10 @@ internal object CodeGenerator {
             propertySpec.addKdoc(kDoc)
         }
 
-
-        if (delegateStyle) {
-            propertySpec.delegate(
-                """
-                immutable(
-                    id = %S,
-                    value = %L,
-                    valueType = %L::class,
-                    description = %S,
-                )
-            """.trimIndent(),
-                flagId, flagValue,flagTypeValue, flag.description,
-            )
-        } else {
-            propertySpec.initializer(
-                """
+        when (style) {
+            SpaceStyle.Property ->
+                propertySpec.initializer(
+                    """
                     ImmutableFeatureFlagSpec(
                         id = %S,
                         value = %L,
@@ -130,34 +113,38 @@ internal object CodeGenerator {
                         description = %S,
                     )
                 """.trimIndent(),
-                flagId, flagValue,flagTypeValue, flag.description,
-            )
+                    flag.id, flag.value, flag.valueType, flag.description,
+                )
+
+            SpaceStyle.Delegate ->
+                propertySpec.delegate(
+                    """
+                    immutable(
+                        id = %S,
+                        value = %L,
+                        valueType = %L::class,
+                        description = %S,
+                    )
+                """.trimIndent(),
+                    flag.id, flag.value, flag.valueType, flag.description,
+                )
         }
+
         return propertySpec.build()
     }
 
-    private fun mutablePropertySpec(
-        flag: FeatureFlagDsl.Mutable,
-        delegateStyle: Boolean,
-    ): PropertySpec {
-        val flagId = checkNotNull(flag.id) {
-            "The required 'id' parameter for the '${flag.name}' feature flag is not specified."
+    private fun mutablePropertySpec(flag: MutableFeatureFlagModel, style: SpaceStyle): PropertySpec {
+        val propertyType = when (style) {
+            SpaceStyle.Property -> MutableFeatureFlagSpec::class
+            SpaceStyle.Delegate -> MutableFeatureFlagValue::class
         }
-        val flagValue = checkNotNull(flag.defaultValue) {
-            "The required 'defaultValue' parameter for the '${flag.defaultValue}' feature flag is not specified."
-        }
-        val flagTypeValue = checkNotNull(flag.valueType) {
-            "The required 'valueType' parameter for the '${flag.name}' feature flag is not specified."
-        }
-
-        val propertyType = (if (delegateStyle) MutableFeatureFlagValue::class else MutableFeatureFlagSpec::class)
             .asClassName()
-            .parameterizedBy(TypeVariableName(flagTypeValue))
+            .parameterizedBy(TypeVariableName(flag.valueType))
 
         val propertySpec = PropertySpec.builder(flag.name, propertyType, KModifier.PUBLIC)
             .mutable(false)
 
-        if (flag.isDeprecated) {
+        if (flag.deprecated) {
             val deprecatedAnnotationSpec =  AnnotationSpec.builder(Deprecated::class)
                 .addMember("%S", "This feature flag is deprecated.")
                 .build()
@@ -169,22 +156,10 @@ internal object CodeGenerator {
             propertySpec.addKdoc(kDoc)
         }
 
-
-        if (delegateStyle) {
-            propertySpec.delegate(
-                """
-                mutable(
-                    id = %S,
-                    defaultValue = %L,
-                    valueType = %L::class,
-                    description = %S,
-                )
-            """.trimIndent(),
-                flagId, flagValue,flagTypeValue, flag.description,
-            )
-        } else {
-            propertySpec.initializer(
-                """
+        when (style) {
+            SpaceStyle.Property ->
+                propertySpec.initializer(
+                    """
                     MutableFeatureFlagSpec(
                         id = %S,
                         defaultValue = %L,
@@ -192,34 +167,38 @@ internal object CodeGenerator {
                         description = %S,
                     )
                 """.trimIndent(),
-                flagId, flagValue,flagTypeValue, flag.description,
-            )
+                    flag.id, flag.defaultValue, flag.valueType, flag.description,
+                )
+
+            SpaceStyle.Delegate ->
+                propertySpec.delegate(
+                    """
+                mutable(
+                    id = %S,
+                    defaultValue = %L,
+                    valueType = %L::class,
+                    description = %S,
+                )
+            """.trimIndent(),
+                    flag.id, flag.defaultValue, flag.valueType, flag.description,
+                )
         }
+
         return propertySpec.build()
     }
 
-    private fun flowPropertySpec(
-        flag: FeatureFlagDsl.Flow,
-        delegateStyle: Boolean,
-    ): PropertySpec {
-        val flagId = checkNotNull(flag.id) {
-            "The required 'id' parameter for the '${flag.name}' feature flag is not specified."
+    private fun flowPropertySpec(flag: FlowFeatureFlagModel, style: SpaceStyle): PropertySpec {
+        val propertyType = when (style) {
+            SpaceStyle.Property -> FlowFeatureFlagSpec::class
+            SpaceStyle.Delegate -> FlowFeatureFlagValue::class
         }
-        val flagValue = checkNotNull(flag.defaultValue) {
-            "The required 'defaultValue' parameter for the '${flag.defaultValue}' feature flag is not specified."
-        }
-        val flagTypeValue = checkNotNull(flag.valueType) {
-            "The required 'valueType' parameter for the '${flag.name}' feature flag is not specified."
-        }
-
-        val propertyType = (if (delegateStyle) FlowFeatureFlagValue::class else FlowFeatureFlagSpec::class)
             .asClassName()
-            .parameterizedBy(TypeVariableName(flagTypeValue))
+            .parameterizedBy(TypeVariableName(flag.valueType))
 
         val propertySpec = PropertySpec.builder(flag.name, propertyType, KModifier.PUBLIC)
             .mutable(false)
 
-        if (flag.isDeprecated) {
+        if (flag.deprecated) {
             val deprecatedAnnotationSpec =  AnnotationSpec.builder(Deprecated::class)
                 .addMember("%S", "This feature flag is deprecated.")
                 .build()
@@ -234,26 +213,15 @@ internal object CodeGenerator {
         val flagStartedStrategy = MemberName(
             SharingStarted.Companion::class.asClassName(),
             when (flag.startedStrategy) {
-                FeatureFlagDsl.Flow.SharingStarted.Lazily -> "Lazily"
-                FeatureFlagDsl.Flow.SharingStarted.Eagerly -> "Eagerly"
+                FlowSharingStarted.Lazily -> "Lazily"
+                FlowSharingStarted.Eagerly -> "Eagerly"
             },
         )
-        if (delegateStyle) {
-            propertySpec.delegate(
-                """
-                flow(
-                    id = %S,
-                    defaultValue = %L,
-                    valueType = %L::class,
-                    description = %S,
-                    startedStrategy = %M,
-                )
-            """.trimIndent(),
-                flagId, flagValue, flagTypeValue, flag.description, flagStartedStrategy,
-            )
-        } else {
-            propertySpec.initializer(
-                """
+
+        when (style) {
+            SpaceStyle.Property ->
+                propertySpec.initializer(
+                    """
                     FlowFeatureFlagSpec(
                         id = %S,
                         defaultValue = %L,
@@ -262,9 +230,24 @@ internal object CodeGenerator {
                         startedStrategy = %M,
                     )
                 """.trimIndent(),
-                flagId, flagValue, flagTypeValue, flag.description, flagStartedStrategy,
-            )
+                    flag.id, flag.defaultValue, flag.valueType, flag.description, flagStartedStrategy,
+                )
+
+            SpaceStyle.Delegate ->
+                propertySpec.delegate(
+                    """
+                flow(
+                    id = %S,
+                    defaultValue = %L,
+                    valueType = %L::class,
+                    description = %S,
+                    startedStrategy = %M,
+                )
+            """.trimIndent(),
+                    flag.id, flag.defaultValue, flag.valueType, flag.description, flagStartedStrategy,
+                )
         }
+
         return propertySpec.build()
     }
 }

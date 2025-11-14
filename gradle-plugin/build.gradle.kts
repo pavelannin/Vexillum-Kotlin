@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 plugins {
     alias(deps.plugins.kotlin.jvm)
     alias (deps.plugins.gradle.publish)
+    alias(deps.plugins.kotlin.serialization)
     `java-gradle-plugin`
     id("io.github.pavelannin.publish")
 }
@@ -44,6 +45,7 @@ dependencies {
     implementation(projects.core)
     implementation(deps.plugin.kotlin.multiplatform)
     implementation(deps.kotlin.poet)
+    implementation(deps.kotlin.serialization.yaml)
     implementation(deps.androidx.gradle)
 }
 

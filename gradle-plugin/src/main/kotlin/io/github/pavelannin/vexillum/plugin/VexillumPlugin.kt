@@ -23,7 +23,8 @@ class VexillumPlugin : Plugin<Project> {
             task.packageClass = checkNotNull(vexillumExt.packageClass ?: androidNamespace) {
                 "The required 'packageClass' parameter is null."
             }
-            task.spaces = vexillumExt.spaces
+            task.spacesDSL = vexillumExt.spacesDSL
+            task.filesYAML = vexillumExt.filesYAML
             task.outputDir = outputDir.get().asFile
         }
 
